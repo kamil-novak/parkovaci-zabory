@@ -313,10 +313,22 @@ require([
 
             // Výpočet délky linie
             let length = Math.round(geometryEngine.planarLength(geometry, "meters"));
-            
+
+            // Výpočet úhlu popisku
+            let calculateAngle = (startVertex, endVertex) => {
+              let angle;
+              angle = ((180/Math.PI)*Math.atan2(endVertex[0]-startVertex[0], endVertex[1]-startVertex[1]))
+              if (angle < 0) {
+                return(angle+360)
+              }
+              else {
+                return(angle)
+              }
+            }
+
             // Vytvoření grafiky
             let segment =  new Graphic({
-              geometry,
+              geometry: geometry.extent.center,
               symbol: {
                 type: "text", 
                 color: "red",
