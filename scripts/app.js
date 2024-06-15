@@ -374,7 +374,7 @@ require([
                 length
               }
             });
-            console.log(geometry.Extent.GetCenter());
+
             LabelLayerLines.push(segment);
       
             LabelLayer.applyEdits({addFeatures: LabelLayerLines})
