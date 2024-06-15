@@ -142,59 +142,7 @@ require([
 
     // Label layer and model
     let LabelLayerLines = [];
-    const LabelLayer = new FeatureLayer({
-      objectIdField: "objectid",
-      fields: [{
-        name: "objectid",
-        alias: "objectid",
-        type: "oid"
-      },
-      {
-        name: "length",
-        alias: "length",
-        type: "long"
-      }],
-      geometryType: "polyline",
-      source: [],
-      renderer: {
-        type: "simple",  // autocasts as new SimpleRenderer()
-        symbol: {
-          type: "simple-line", 
-          width: 0, // autocasts as new SimpleFillSymbol()
-          color: "red",
-          outline: {  // autocasts as new SimpleLineSymbol()
-            width: 0.5,
-            color: "white"
-          }
-      },
-    },
-      labelingInfo: {
-        allowOverrun: true,
-        labelPlacement: "above-along", 
-        repeatLabel: true,
-        labelExpression: "[length] m", 
-        symbol: {
-          type: "text",  // autocasts as new TextSymbol()
-          color: "black",
-          haloSize: 1,
-          haloColor: "white",
-          font: {  // autocast as new Font()
-            size: 20,
-          }
-        }
-      }
-    });
-
-    const sketchSymbol = {
-      type: "simple-marker",
-      style: "circle",
-      size: 15,
-      color: "#00F700",
-      outline: {
-        color: "#ffffff",
-        width: 1.5
-      }
-    }
+    const LabelLayer = new GraphicsLayer({})
     
   
     // Edit layer
@@ -332,8 +280,66 @@ require([
           }]
         });
 
+        // Editor - popisky
+        let startVertex = null;
+        let endVertex = null;
+        let countVertexSegment = 0;
+        editorWidget.on("sketch-create", function(evt) {
+          const { toolEventInfo } = evt.detail;
+          
+          // Po vložení nového vertexu
+          if (toolEventInfo?.type === "vertex-add") {
+            startVertex =  toolEventInfo.added[0];
+            countVertexSegment += 1;
+          }
+
+          // Při pohybu myší
+          if (toolEventInfo?.type === "cursor-update") {
+            endVertex =  toolEventInfo.coordinates
+          }
         
-       
+          // Vytvoření linie mezi vertexem a pozicí myši
+          if (countVertexSegment === 1 && endVertex) {
+            
+            // Odebrání poslední pozice z pole
+            LabelLayerLines.pop();
+
+            // Vytvoření liniové geometrie z vertexu a pozice myši
+            let geometry = new Polyline({
+              spatialReference: view.spatialReference,
+              paths: [[startVertex, endVertex]],
+              
+            }) 
+
+            // Výpočet délky linie
+            let length = Math.round(geometryEngine.planarLength(geometry, "meters"));
+            
+            // Vytvoření grafiky
+            let segment =  new Graphic({
+              geometry,
+              symbol: {
+                type: "text", 
+                color: "red",
+                text: `${length} m`,
+                font: {
+                  size: 30
+                },
+                haloColor: "black",
+                haloSize: 1,
+                horizontalAlignment: "center",
+                verticalAlignment: "top"
+              },
+            });
+
+            // Přidání grafiky do pole
+            LabelLayerLines.push(segment);
+      
+            // Přidání pole do grafické vrstvy
+            LabelLayer.removeAll();
+            LabelLayer.addMany(LabelLayerLines);
+          }
+        });
+
         // Widgets positioning
         view.ui.add(locateWidget, "top-left", 0);
         view.ui.add(homeWidget, "top-left", 1);
@@ -343,56 +349,7 @@ require([
         view.ui.add(editorWidget, "top-right", 1);
 
 
-        let startVertex = null;
-        let endVertex = null;
-        let countVertexSegment = 0;
-        editorWidget.on("sketch-create", function(evt) {
-          const { toolEventInfo } = evt.detail;
-          
-          if (toolEventInfo?.type === "vertex-add") {
-            startVertex =  toolEventInfo.added[0];
-            countVertexSegment += 1;
-          }
-
-          if (toolEventInfo?.type === "cursor-update") {
-            
-            endVertex =  toolEventInfo.coordinates
-          }
         
-          if (countVertexSegment === 1 && endVertex) {
-            LabelLayerLines.pop();
-
-            let geometry = new Polyline({
-              spatialReference: view.spatialReference,
-              paths: [[startVertex, endVertex]]
-            }) 
-            let length = Math.round(geometryEngine.planarLength(geometry, "meters"));
-            
-            let segment =  new Graphic({
-              geometry,
-              attributes: {
-                length
-              }
-            });
-
-            LabelLayerLines.push(segment);
-      
-            LabelLayer.applyEdits({addFeatures: LabelLayerLines})
-            LabelLayer.queryFeatures({where: "1=1"}).then((result) => {
-           if(result.features.length === 0) {
-                LabelLayer.applyEdits({addFeatures: LabelLayerLines}).then(() => {
-                  LabelLayer.refresh()
-                })
-              }
-           
-            if(result.features.length > 1) {
-              LabelLayer.applyEdits({deleteFeatures: result.features, addFeatures: LabelLayerLines}).then(() => {
-                LabelLayer.refresh()
-              })
-            }
-          })
-          }
-        });
           
         // WATCHING EVENTS
         // Layers visibility
