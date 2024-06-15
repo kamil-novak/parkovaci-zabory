@@ -319,28 +319,29 @@ require([
               let angle;
               angle = ((180/Math.PI)*Math.atan2(endVertex[0]-startVertex[0], endVertex[1]-startVertex[1]))
               if (angle < 0) {
-                return(angle+360)
+                return(angle+360 + 90)
               }
               else {
-                return(angle)
+                return(angle - 90)
               }
             }
-
+console.log(calculateAngle(startVertex, endVertex));
             // Vytvoření grafiky
             let segment =  new Graphic({
               geometry: geometry.extent.center,
               symbol: {
                 type: "text", 
-                color: "red",
-                text: `${length} m`,
+                color: "white",
+                text: `\u{200B} \n${length} m`,
                 font: {
-                  size: 30
-                },
+                  size: 20
+                  },
                 haloColor: "black",
-                haloSize: 1,
+                haloSize: 1.5,
                 horizontalAlignment: "center",
-                verticalAlignment: "top"
-              },
+                verticalAlignment: "middle",
+                angle: calculateAngle(startVertex, endVertex),
+                }
             });
 
             // Přidání grafiky do pole
