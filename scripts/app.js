@@ -372,10 +372,10 @@ require([
           color: "white",
           text: `\u{200B} \n${length} m`, // Odsazení od pomyslné linie neviditelným znakem
           font: {
-            size: 20
+            size: 10
             },
           haloColor: "black",
-          haloSize: 1.5,
+          haloSize: 1,
           horizontalAlignment: "center",
           verticalAlignment: "middle",
           angle: calculateAngle(startVertex, endVertex),
