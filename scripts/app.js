@@ -141,7 +141,8 @@ require([
 
     // Label layer
     const LabelLayer = new GraphicsLayer({
-      title: "Vrstva délek (editace)"
+      title: "Vrstva délek (editace)",
+      listMode: "hide",
     })
       
     // Edit layer
