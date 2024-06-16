@@ -271,8 +271,8 @@ require([
             },
             enabled: true, 
             addEnabled: true, 
-            updateEnabled: false, 
-            deleteEnabled: false,
+            updateEnabled: true, 
+            deleteEnabled: true,
             attributeUpdatesEnabled: true, 
             geometryUpdatesEnabled: true, 
             attachmentsOnCreateEnabled: true, 
@@ -281,7 +281,7 @@ require([
         });
 
         // Editor - popisky
-        let startVertex = null;
+        /* let startVertex = null;
         let endVertex = null;
  
         // Při vytváření nové geometrie
@@ -315,13 +315,16 @@ require([
             LabelLayer.removeAll();
             LabelLayer.add(segment);
            }
-        });
+        }); */
 
         // Při úpravě stávající geometrie
-        editorWidget.on("sketch-update", function(evt) {
-          if(evt.detail.state === "active" && evt.detail.tool === "reshape") {
+        editorWidget.on(["sketch-update", "sketch-create"], function(evt) {
+          let evtDetail = evt.detail;
+          console.log(evt.detail);
+          if(
+            (evtDetail.tool === "reshape" || evtDetail.tool === "polygon" || evtDetail.tool === "transform")) {
             LabelLayer.removeAll();
-            let polygonVertexes = evt.detail.graphics[0].geometry.rings[0];
+            let polygonVertexes = evt.detail.graphics ? evt.detail.graphics[0].geometry.rings[0] : evt.detail.graphic.geometry.rings[0];
             polygonVertexes.forEach((vertex, index) => {
               if (index + 1 < polygonVertexes.length) {
                 let startVertex =  vertex;
@@ -344,6 +347,10 @@ require([
                 LabelLayer.add(segment);
               }
             })
+          }
+          if ( evtDetail.state === "complete" 
+              || evtDetail.state === "cancel") {
+            LabelLayer.removeAll();
           }
         })
 
