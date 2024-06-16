@@ -140,7 +140,9 @@ require([
     });
 
     // Label layer
-    const LabelLayer = new GraphicsLayer({})
+    const LabelLayer = new GraphicsLayer({
+      title: "Vrstva délek (editace)"
+    })
       
     // Edit layer
     /* const EditLayer = new FeatureLayer({
@@ -263,12 +265,19 @@ require([
           view: view,
           snappingOptions: { 
             enabled: true,
+            featureSources: [
+              {
+                layer: LabelLayer,
+                enabled: false
+              },
+              {
+                layer: EditLayer_1,
+                enabled: true
+              }
+            ] 
           },
           layerInfos: [{
             layer: EditLayer_1, 
-            formTemplate:  { 
-              elements: []
-            },
             enabled: true, 
             addEnabled: true, 
             updateEnabled: true, 
