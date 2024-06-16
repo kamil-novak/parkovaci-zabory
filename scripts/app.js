@@ -261,9 +261,12 @@ require([
         // Editor
         var editorWidget = new Editor({
           view: view,
+          snappingOptions: { 
+            enabled: true,
+          },
           layerInfos: [{
-            layer: EditLayer_1, // pass in the feature layer,
-            formTemplate:  { // autocastable to FormTemplate
+            layer: EditLayer_1, 
+            formTemplate:  { 
               elements: []
             },
             enabled: true, 
