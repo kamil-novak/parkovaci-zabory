@@ -48,7 +48,6 @@ require([
       <div class="problems-map-message-select problems-info">
         
       </div>`
-
        
     // APP lAYOUT ---
     // Header bar
@@ -140,11 +139,9 @@ require([
       }
     });
 
-    // Label layer and model
-    let LabelLayerLines = [];
+    // Label layer
     const LabelLayer = new GraphicsLayer({})
-    
-  
+      
     // Edit layer
     /* const EditLayer = new FeatureLayer({
       url: config.editFeatureUrl,
@@ -281,50 +278,17 @@ require([
         });
 
         // Editor - popisky
-        /* let startVertex = null;
-        let endVertex = null;
- 
-        // Při vytváření nové geometrie
-        editorWidget.on("sketch-create", function(evt) {
-          const { toolEventInfo } = evt.detail;
-          
-          // Po vložení nového vertexu
-          if (toolEventInfo?.type === "vertex-add") {
-            startVertex =  toolEventInfo.added[0];
-            LabelLayer.removeAll();
-          }
-
-          // Při pohybu myší
-          if (toolEventInfo?.type === "cursor-update") {
-            endVertex =  toolEventInfo.coordinates
-
-            // Vytvoření liniové geometrie z vertexu a pozice myši
-            let geometry = new Polyline({
-              spatialReference: view.spatialReference,
-              paths: [[startVertex, endVertex]],
-            }) 
-
-            // Výpočet délky linie
-            let length = Math.round(geometryEngine.planarLength(geometry, "meters"));
-
-            // Vytvoření grafiky
-            let segment = createGraphic(geometry, length, startVertex, endVertex);
-
-            // Vložení nové grafiky do mapy
-            view.map.reorder(LabelLayer, 9999);
-            LabelLayer.removeAll();
-            LabelLayer.add(segment);
-           }
-        }); */
-
-        // Při úpravě stávající geometrie
         editorWidget.on(["sketch-update", "sketch-create"], function(evt) {
           let evtDetail = evt.detail;
-          console.log(evt.detail);
+
           if(
             (evtDetail.tool === "reshape" || evtDetail.tool === "polygon" || evtDetail.tool === "transform")) {
             LabelLayer.removeAll();
+
+            // Přístup k vertexům kresleného polygonu
             let polygonVertexes = evt.detail.graphics ? evt.detail.graphics[0].geometry.rings[0] : evt.detail.graphic.geometry.rings[0];
+
+            // Vytvoření linií z vertexů polygonu
             polygonVertexes.forEach((vertex, index) => {
               if (index + 1 < polygonVertexes.length) {
                 let startVertex =  vertex;
@@ -348,10 +312,14 @@ require([
               }
             })
           }
-          if ( evtDetail.state === "complete" 
-              || evtDetail.state === "cancel") {
+          if ( evtDetail.state === "complete" || evtDetail.state === "cancel") {
             LabelLayer.removeAll();
           }
+        })
+
+        // Vymazání grafiky po uložení editace
+        EditLayer_1.on("edits", () => {
+          LabelLayer.removeAll();
         })
 
         // Widgets positioning
@@ -362,8 +330,6 @@ require([
         view.ui.add(searchWidget, "top-right", 1);
         view.ui.add(editorWidget, "top-right", 1);
 
-
-        
           
         // WATCHING EVENTS
         // Layers visibility
