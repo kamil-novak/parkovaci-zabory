@@ -168,7 +168,7 @@ require([
         document.getElementById("loading-screen").remove();
 
         view.map.add(LabelLayer);
-  
+         
         // Sublayers
         const EditLayer_1 = map.findLayerById("OD_parkovani_zabory_2008");
         
@@ -283,26 +283,20 @@ require([
         // Editor - popisky
         let startVertex = null;
         let endVertex = null;
-        let countVertexSegment = 0;
+ 
         editorWidget.on("sketch-create", function(evt) {
           const { toolEventInfo } = evt.detail;
+          let segment;
           
           // Po vložení nového vertexu
           if (toolEventInfo?.type === "vertex-add") {
             startVertex =  toolEventInfo.added[0];
-            countVertexSegment += 1;
+            LabelLayer.removeAll();
           }
 
           // Při pohybu myší
           if (toolEventInfo?.type === "cursor-update") {
             endVertex =  toolEventInfo.coordinates
-          }
-        
-          // Vytvoření linie mezi vertexem a pozicí myši
-          if (countVertexSegment === 1 && endVertex) {
-            
-            // Odebrání poslední pozice z pole
-            LabelLayerLines.pop();
 
             // Vytvoření liniové geometrie z vertexu a pozice myši
             let geometry = new Polyline({
@@ -325,14 +319,14 @@ require([
                 return(angle - 90)
               }
             }
-console.log(calculateAngle(startVertex, endVertex));
+
             // Vytvoření grafiky
-            let segment =  new Graphic({
+            segment =  new Graphic({
               geometry: geometry.extent.center,
               symbol: {
                 type: "text", 
                 color: "white",
-                text: `\u{200B} \n${length} m`,
+                text: `\u{200B} \n${length} m`, // Odsazení od pomyslné linie neviditelným znakem
                 font: {
                   size: 20
                   },
@@ -344,13 +338,11 @@ console.log(calculateAngle(startVertex, endVertex));
                 }
             });
 
-            // Přidání grafiky do pole
-            LabelLayerLines.push(segment);
-      
-            // Přidání pole do grafické vrstvy
+            // Vložení nové grafiky do mapy
+            view.map.reorder(LabelLayer, 9999);
             LabelLayer.removeAll();
-            LabelLayer.addMany(LabelLayerLines);
-          }
+            LabelLayer.add(segment);
+           }
         });
 
         // Widgets positioning
