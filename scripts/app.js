@@ -286,7 +286,14 @@ require([
             attributeUpdatesEnabled: true, 
             geometryUpdatesEnabled: true, 
             attachmentsOnCreateEnabled: true, 
-            attachmentsOnUpdateEnabled: true 
+            attachmentsOnUpdateEnabled: true,
+            formTemplate: {
+              elements: [{
+                  type: "field",
+                  fieldName: "cislo",
+                  label: "Číslo",
+                }]
+            }
           }]
         });
 
