@@ -264,6 +264,12 @@ require([
         // Editor
         var editorWidget = new Editor({
           view: view,
+          visibleElements: {
+            tooltipsToggle: false,
+            snappingControlsElements: {
+              layerList: false
+            }
+          },
           snappingOptions: { 
             enabled: true,
             featureSources: [
@@ -348,7 +354,7 @@ require([
         view.ui.add(basemapWidget, "top-left", 2);
         view.ui.add(infoWidget, "top-left", 3);
         view.ui.add(searchWidget, "top-right", 1);
-        view.ui.add(editorWidget, "top-right", 1);
+        view.ui.add(editorWidget, "bottom-trailing", 1);
 
           
         // WATCHING EVENTS
