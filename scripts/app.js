@@ -1,3 +1,8 @@
+// --- URL parametry ---
+var queryString = window.location.search;
+var urlParams = new URLSearchParams(queryString);
+var urlCislo = urlParams.get('cislo');
+
 // ARCGIS JS API MODULS ---
 require([
     "esri/WebMap",
@@ -23,8 +28,9 @@ require([
     "esri/widgets/Sketch/SketchViewModel",
     "esri/widgets/Editor",
     "esri/geometry/Polyline",
-    "esri/geometry/geometryEngine"
-   ], function(WebMap, MapView, Popup, reactiveUtils, Expand, Home, Locate, LocateVM, LocalBasemapsSource, TileLayer, Basemap, BasemapGallery, Search, FeatureLayer, GraphicsLayer, Graphic, Point, MapImageLayer, esriRequest, Feature, SketchViewModel, Editor, Polyline, geometryEngine) {
+    "esri/geometry/geometryEngine",
+    "esri/form/ExpressionInfo"
+   ], function(WebMap, MapView, Popup, reactiveUtils, Expand, Home, Locate, LocateVM, LocalBasemapsSource, TileLayer, Basemap, BasemapGallery, Search, FeatureLayer, GraphicsLayer, Graphic, Point, MapImageLayer, esriRequest, Feature, SketchViewModel, Editor, Polyline, geometryEngine, ExpressionInfo) {
 
     // GLOBAL VARIABLES ---
     let sketchViewModel = null;
@@ -171,6 +177,21 @@ require([
          
         // Sublayers
         const EditLayer_1 = map.findLayerById("OD_parkovani_zabory_2008");
+
+        // Doplnění cisla z query parametru
+        EditLayer_1.outFields = ["*"];
+        if (urlCislo) {
+          EditLayer_1.on("edits", (evt) => {
+            if (evt.edits.addFeatures.length > 0) {
+              let addFeatures = evt.edits.addFeatures;
+              addFeatures[0].attributes.cislo = urlCislo;
+              addFeatures[0].attributes.objectid = evt.addedFeatures[0].objectId;
+              EditLayer_1.applyEdits({
+                updateFeatures: addFeatures
+              })
+            }
+          })
+        }
         
         // Widget
         // Tlačítko Home
@@ -262,6 +283,10 @@ require([
 
         // Widget 
         // Editor
+        const hideFields = new ExpressionInfo({
+          name: "alwaysHidden",
+          expression: "false"
+        });
         var editorWidget = new Editor({
           view: view,
           visibleElements: {
@@ -298,6 +323,7 @@ require([
                   type: "field",
                   fieldName: "cislo",
                   label: "Číslo",
+                  visibilityExpression: "alwaysHidden"
                 }]
             }
           }]
