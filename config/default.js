@@ -5,6 +5,9 @@
 // -----------------------------------------------------------------------------------
 
 var config = {
+
+    variable1: "",
+    variable2: "",
     
     // Text v horní liště mapové aplikace
     headerTitle: "Zákresy parkovacích záborů",
@@ -14,6 +17,9 @@ var config = {
 
     // ID webové mapy
     webmapId: "56ea098b533f428eacef5ad58571e693",
+
+    // ID editační služby
+    editLayerId: "OD_parkovani_zabory_2008",
 
     // Souřadnicový systém webov mapy ( kód EPSG )
     webmapSpatialReference: 5514,
