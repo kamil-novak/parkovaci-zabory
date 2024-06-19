@@ -21,40 +21,12 @@ require([
     "esri/layers/FeatureLayer",
     "esri/layers/GraphicsLayer",
     "esri/Graphic",
-    "esri/geometry/Point",
-    "esri/layers/MapImageLayer",
-    "esri/request",
-    "esri/widgets/Feature",
-    "esri/widgets/Sketch/SketchViewModel",
     "esri/widgets/Editor",
     "esri/geometry/Polyline",
     "esri/geometry/geometryEngine",
     "esri/form/ExpressionInfo"
-   ], function(WebMap, MapView, Popup, reactiveUtils, Expand, Home, Locate, LocateVM, LocalBasemapsSource, TileLayer, Basemap, BasemapGallery, Search, FeatureLayer, GraphicsLayer, Graphic, Point, MapImageLayer, esriRequest, Feature, SketchViewModel, Editor, Polyline, geometryEngine, ExpressionInfo) {
+   ], function(WebMap, MapView, Popup, reactiveUtils, Expand, Home, Locate, LocateVM, LocalBasemapsSource, TileLayer, Basemap, BasemapGallery, Search, FeatureLayer, GraphicsLayer, Graphic,Editor, Polyline, geometryEngine, ExpressionInfo) {
 
-    // GLOBAL VARIABLES ---
-    let sketchViewModel = null;
-
-    // Sketching state
-    let sketchingState = false;
-
-    // Form state
-    let formState = {
-      geometry: null,
-      category: null,
-      description: null,
-      email: null,
-      attachment: null,
-      attachmentData: null
-    };
-
-    // DOM ---
-    // MESSAGES
-    const messageSelectPlace = `
-      <div class="problems-map-message-select problems-info">
-        
-      </div>`
-       
     // APP lAYOUT ---
     // Header bar
     document.querySelector(".title-container").innerHTML = config.headerTitle;
@@ -151,21 +123,6 @@ require([
       listMode: "hide",
     })
       
-    // Edit layer
-    /* const EditLayer = new FeatureLayer({
-      url: config.editFeatureUrl,
-      outFields: ["*"]
-    }) */
-    
-    // Locate layer
-    const locateLayer = new GraphicsLayer();
-  
-    // Operation layers
-    let OperationalLayer_1 = null; 
-    let OperationalLayer_2 = null; 
-    let OperationalLayer_3 = null; 
-    let OperationalLayer_4 = null; 
-
     // MAIN CODE
     // After view is loaded    
     reactiveUtils.once( () => view.ready === true )
@@ -173,6 +130,7 @@ require([
         // Loading screen
         document.getElementById("loading-screen").remove();
 
+        // Add graphic layer for edit sketch labeling 
         view.map.add(LabelLayer);
          
         // Sublayers
@@ -207,11 +165,6 @@ require([
           scale: 500,
           popupEnabled: false,
           label: "Najdi moji polohu",
-        });
-        let locateVM = new LocateVM({
-          view,
-          scale: 500,
-          popupEnabled: false,
         });
 
         // Widget
@@ -263,8 +216,8 @@ require([
               outFields: ["*"],
               name: "Adresní místa",
               placeholder: "Hledat adresu",
-              maxResults: 6,
-              maxSuggestions: 6,
+              maxResults: 20,
+              maxSuggestions: 20,
               suggestionsEnabled: true,
               minSuggestCharacters: 3,
               popupEnabled: false,
@@ -273,7 +226,7 @@ require([
                 size: "12px",  
                 color: [0, 0, 0, 0],
                 outline: {  
-                  color: [217, 0, 18],
+                  color: "#F7F700",
                   width: 2  
                 }
               }
@@ -292,7 +245,7 @@ require([
           visibleElements: {
             tooltipsToggle: false,
             snappingControlsElements: {
-              layerList: false
+              layerList: true // Toto po otestování zakázat
             }
           },
           snappingOptions: { 
@@ -380,8 +333,7 @@ require([
         view.ui.add(basemapWidget, "top-left", 2);
         view.ui.add(infoWidget, "top-left", 3);
         view.ui.add(searchWidget, "top-right", 1);
-        view.ui.add(editorWidget, "bottom-trailing", 1);
-
+        view.ui.add(editorWidget, "bottom-right", 1);
           
         // WATCHING EVENTS
         // Layers visibility
@@ -403,15 +355,12 @@ require([
               if (height <= 1130) {
                 infoNode.style.maxHeight = (height - 350) + "px";
               }
-
-              // Add problem button
             }
           }, 
           {
             initial: true
           }
         ); 
-
     });
 
     // FUNCTIONS ---
