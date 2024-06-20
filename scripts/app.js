@@ -13,7 +13,6 @@ require([
     "esri/widgets/Home",
     "esri/widgets/Locate",
     "esri/widgets/BasemapGallery/support/LocalBasemapsSource",
-    "esri/layers/TileLayer",
     "esri/Basemap",
     "esri/widgets/BasemapGallery",
     "esri/widgets/Search",
@@ -26,15 +25,7 @@ require([
     "esri/form/ExpressionInfo",
     "esri/request",
     "esri/identity/IdentityManager"
-   ], function(WebMap, MapView, Popup, reactiveUtils, Expand, Home, Locate, LocalBasemapsSource, TileLayer, Basemap, BasemapGallery, Search, FeatureLayer, GraphicsLayer, Graphic,Editor, Polyline, geometryEngine, ExpressionInfo, esriRequest, esriId) {
-
-    // HIDE SIGN IN DIALOG
-    esriId.on("dialog-create", function() {
-      esriId.dialog.visible = false;
-      window.setTimeout(function() {
-        esriId.dialog.emit("cancel", {});
-      }, 500);
-    });
+   ], function(WebMap, MapView, Popup, reactiveUtils, Expand, Home, Locate, LocalBasemapsSource, Basemap, BasemapGallery, Search, FeatureLayer, GraphicsLayer, Graphic, Editor, Polyline, geometryEngine, ExpressionInfo, esriRequest, esriId) {
 
     // TOKEN
     let var1 = config.variable1;
@@ -59,6 +50,15 @@ require([
     }).then((response) => {
 
       let geoJson = response.data.token ? response.data.token : "";
+      let expires = response.data.token ? response.data.expires : "";
+      let ssl = response.data.ssl ? response.data.ssl : "";
+
+      esriId.registerToken({
+        "expires": expires,
+        "server": `${config.portalUrl}/sharing/rest/${generateToken}`,
+        "ssl": ssl,
+        "token": geoJson
+      })
 
       // APP lAYOUT ---
       // Header bar
@@ -70,18 +70,6 @@ require([
 
       // WEBMAP ---
       // Basemaps
-      // Ortofoto
-      const BaseMapDefault = new Basemap({
-        baseLayers: [
-          new TileLayer({
-            url: "https://gis.jihlava-city.cz/server/rest/services/basemaps/ORP_ortofoto/MapServer",
-            opacity: 0.9999,
-            title: "Letecká mapa",
-          })
-        ],
-        title: "Letecká mapa",
-        thumbnailUrl: "images/bm-letecka-aktual.png"
-      });
       // Světlá
       const BaseMap_1 = new Basemap({
         portalItem: {
@@ -104,6 +92,17 @@ require([
         title: "Základní mapa",
         thumbnailUrl: "images/bm-zakladni.png"
       });
+      // Ortofoto
+      const BaseMap_3 = new Basemap({
+        portalItem: {
+          id: "3b9f68473c714c888769cb04f72f15f6",
+          portal: {
+            url: "https://gis.jihlava-city.cz/portal"
+          },
+        },
+        title: "Letecká mapa",
+        thumbnailUrl: "images/bm-letecka-aktual.png"
+      });
 
       // Search layers
       // Base layer
@@ -115,7 +114,6 @@ require([
 
       // WebMap
       var map = new WebMap({
-        basemap: BaseMapDefault,
         portalItem: { 
           portal: {
             url: config.portalUrl
@@ -221,9 +219,10 @@ require([
           var basemapWidget = new Expand({
               content: new BasemapGallery({
                   view: view,
+                  activeBasemap: BaseMap_2,  
                   source: new LocalBasemapsSource({
                       basemaps: [
-                          BaseMapDefault,
+                          BaseMap_3,
                           BaseMap_1,
                           BaseMap_2   
                       ]
@@ -369,11 +368,6 @@ require([
           view.ui.add(editorWidget, "bottom-right", 1);
             
           // WATCHING EVENTS
-          // Layers visibility
-          reactiveUtils.watch(function() { return([map.basemap]) }, 
-        
-          ); 
-
           // Elements resizing and positioning
           reactiveUtils.watch(function() { return([view.width, view.height]) }, 
             ([width, height]) => {
