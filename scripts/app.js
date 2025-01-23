@@ -166,6 +166,15 @@ require([
           
           // Sublayers
           let EditLayer_1 = map.findLayerById(config.editLayerId);
+
+          // Init snapping layers
+          let initSnappingLayers = []
+          config.snappLayersOnStart.forEach((layerId) => {
+            const layer = map.findLayerById(layerId);
+            if (layer) {
+              initSnappingLayers.push(layer)
+            }
+          })
          
           // Doplnění cisla z query parametru
           EditLayer_1.outFields = ["*"];
@@ -287,10 +296,9 @@ require([
                   layer: LabelLayer,
                   enabled: false
                 },
-                {
-                  layer: EditLayer_1,
-                  enabled: true
-                }
+                ...initSnappingLayers.map((layer) => {
+                  return{layer, enabled: true }
+                })
               ] 
             },
             layerInfos: [{
